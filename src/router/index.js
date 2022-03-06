@@ -1,21 +1,30 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Timetable from '../components/Timetable.vue'
+import Vue from "vue";
+import Router from "vue-router";
+import Calendar from "@/components/Calendar";
+import Parameters from "@/components/Parameters";
+import Help from "@/components/Help";
 
-Vue.use(VueRouter)
+import { Datetime } from "vue-datetime";
 
-const routes = [
-  {
-    path: '/',
-    name: 'Timetable',
-    component: Timetable
-  }
-]
+Vue.component("datetime", Datetime);
+Vue.use(Router);
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-})
-
-export default router
+export default new Router({
+  routes: [
+    {
+      path: "/",
+      name: "Calendar",
+      component: Calendar,
+    },
+    {
+      path: "/parameters",
+      name: "Parameters",
+      component: Parameters,
+    },
+    {
+      path: "/help",
+      name: "Help",
+      component: Help,
+    },
+  ],
+});

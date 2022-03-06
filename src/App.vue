@@ -1,138 +1,164 @@
 <template>
-  <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="ANU Timetable Logo"
-          class="shrink mr-2"
-          contain
-          :src="require('./assets/logo.png')"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="ANU Timetable Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          :src="require('./assets/name.png')"
-          width="200"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-autocomplete
-          v-model="values"
-          :items="options"
-          class="mr-2"
-          style="max-width: 650px"
-          multiple
-          chips
-          deletable-chips
-          flat
-          hide-no-data
-          hide-details
-          solo-inverted
-          label="What courses are you taking?"
-      >
-        <template v-slot:selection="data">
-          <v-chip
-              :color="colors[values.indexOf(data.item.value)]"
-              close
-              @click="data.select"
-              @click:close="remove(data.item)"
-          >
-            {{ data.item.value.split('_')[0] }}
-          </v-chip>
-        </template>
-      </v-autocomplete>
-      <v-select v-model="select" :items="sessions" style="max-width: 150px" flat hide-details solo-inverted></v-select>
-    </v-app-bar>
-
-    <v-main>
-      <router-view :values="values"/>
-    </v-main>
-  </v-app>
+  <div id="app">
+    <router-link to="/parameters"></router-link>
+    <router-view></router-view>
+    <div class="internetStatus" v-if="!internetCheck">
+      <i class="ri-cloud-off-line"></i>
+      {{ statusMessage }}
+    </div>
+  </div>
 </template>
 
 <script>
-import timetable from '../scraper/timetable.json';
-
 export default {
-  name: 'App',
+  name: "app",
+  components: {},
+  data() {
+    return {
+      internetCheck: true,
+      statusMessage: "",
+      errInternet: `Veuillez vérifier votre connexion internet, certaines fonctionnalités
+      comme la synchronisation multi-appareils ou l'envoi de sms sont
+      interrompus`,
+      reconnect: "Connexion établie ! Tentative de reconnection ...",
+      successSync: "Synchronisation effectuée avec succès !",
 
-  data: () => ({
-    timetable,
-    values: [],
-    sessions: [
-      { text: 'Semester 1', value: 'S1' },
-      { text: 'Semester 2', value: 'S2' },
-      { text: 'Summer', value: 'X1' },
-      { text: 'Autumn', value: 'X2' },
-      { text: 'Winter', value: 'X3' },
-      { text: 'Spring', value: 'X4' }
-    ],
-    select: new Date().getMonth() + 1 >= 6 && new Date().getMonth + 1 <= 10 ? 'S2' : 'S1',
-    colors: ['blue lighten-1', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
-    initialized: false,
-  }),
-
-  mounted() {
-    if (this.$route.query.s) {
-      this.select = this.$route.query.s
-    } else if (localStorage.select) {
-      this.select = localStorage.select
-      this.$router.push({ query: { ...this.$route.query, s: this.select } })
-    } else {
-      localStorage.select = this.select
-      this.$router.push({ query: { ...this.$route.query, s: this.select } })
-    }
-
-    if (this.$route.query.c) {
-      this.values = this.$route.query.c.split(',').map(c => Object.keys(timetable).find(key => key.startsWith(c)))
-    } else if (localStorage.getItem('values')) {
-      try {
-        this.values = JSON.parse(localStorage.getItem('values'))
-      } catch (e) {
-        localStorage.removeItem('values')
-      }
-      this.$router.push({ query: { ...this.$route.query, c: this.values.map(value => value.split('_')[0]).join(',') } }).catch(() => {})
-    } else {
-      localStorage.setItem('values', JSON.stringify(this.values))
-      this.$router.push({ query: { ...this.$route.query, c: this.values.map(value => value.split('_')[0]).join(',') } }).catch(() => {})
-    }
-
-    this.$watch('select', newSelect => {
-      localStorage.select = newSelect
-      this.$router.push({ query: { ...this.$route.query, s: newSelect } }).catch(() => {})
-      this.values = []
-    })
-    this.$watch('values', newValues => {
-      localStorage.setItem('values', JSON.stringify(newValues))
-      this.$router.push({ query: { ...this.$route.query, c: newValues.map(value => value.split('_')[0]).join(',') } }).catch(() => {})
-    })
-  },
-
-  computed: {
-    options () {
-      return Object.keys(timetable).filter(key => new RegExp(`_${this.select}`).test(key)).map(key => ({
-        text: key.replace(/_[a-zA-Z0-9]+/, ''),
-        value: key
-      }))
-    }
+      localDB: Object,
+    };
   },
 
   methods: {
-    remove (item) {
-      const index = this.values.indexOf(item.value)
-      if (index >= 0) this.values.splice(index, 1)
-    }
-  }
+    initialize() {},
+    checkInternetConnection() {
+      if (navigator.onLine) {
+        if (!this.internetCheck) {
+          this.statusMessage = this.reconnect;
+          setTimeout(() => {
+            this.statusMessage = this.successSync;
+          }, 1500);
+          setTimeout(() => {
+            this.internetCheck = true;
+          }, 3000);
+        }
+      } else {
+        this.statusMessage = this.errInternet;
+        this.internetCheck = false;
+      }
+    },
+    addEventToLocalDB() {
+      // This works on all devices/browsers, and uses IndexedDBShim as a final fallback
+      var indexedDB =
+        window.indexedDB ||
+        window.mozIndexedDB ||
+        window.webkitIndexedDB ||
+        window.msIndexedDB ||
+        window.shimIndexedDB;
+
+      // Open (or create) the database
+      var open = indexedDB.open("MyDatabaseLeN1", 1);
+
+      // Create the schema
+      open.onupgradeneeded = function () {
+        var db = open.result;
+        var store = db.createObjectStore("MyObjectStore", { keyPath: "id" });
+        store.createIndex("NameIndex", ["name.last", "name.first"]);
+      };
+
+      open.onsuccess = function () {
+        // Start a new transaction
+        var db = open.result;
+        var tx = db.transaction("MyObjectStore", "readwrite");
+        var store = tx.objectStore("MyObjectStore");
+        store.index("NameIndex");
+
+        // Add some data
+        store.put({ id: 12345, name: { first: "John", last: "Doe" }, age: 42 });
+
+        // Close the db when the transaction is done
+        tx.oncomplete = function () {
+          db.close();
+        };
+      };
+    },
+    retriveToLocalDB() {
+      // This works on all devices/browsers, and uses IndexedDBShim as a final fallback
+      var indexedDB =
+        window.indexedDB ||
+        window.mozIndexedDB ||
+        window.webkitIndexedDB ||
+        window.msIndexedDB ||
+        window.shimIndexedDB;
+
+      // Open (or create) the database
+      var open = indexedDB.open("MyDatabaseLeN1", 1);
+
+      // Create the schema
+      open.onupgradeneeded = function () {
+        var db = open.result;
+        var store = db.createObjectStore("MyObjectStore", { keyPath: "id" });
+        store.createIndex("NameIndex", ["name.last", "name.first"]);
+      };
+
+      open.onsuccess = function () {
+        // Start a new transaction
+        var db = open.result;
+        var tx = db.transaction("MyObjectStore", "readwrite");
+        var store = tx.objectStore("MyObjectStore");
+        store.index("NameIndex");
+
+        // Query the data
+        var getJohn = store.get(12345);
+
+        getJohn.onsuccess = function () {
+          if (getJohn.result) {
+            console.log("ouho", getJohn.result.name.first); // => "John"
+          } else {
+            console.log("Impossible de trouver john, il faut l'enregistrer"); // => "John"
+          }
+        };
+
+        // Close the db when the transaction is done
+        tx.oncomplete = function () {
+          db.close();
+        };
+      };
+    },
+  },
+  created() {
+    setInterval(() => {
+      this.checkInternetConnection();
+    }, 3000);
+  },
+  mounted() {
+    this.retriveToLocalDB();
+    setTimeout(() => {
+      this.addEventToLocalDB();
+    }, 1000);
+
+    setTimeout(() => {
+      this.retriveToLocalDB();
+    }, 3000);
+  },
 };
 </script>
+
+<style>
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin: 0;
+  /* margin-top: 60px; */
+}
+.internetStatus {
+  position: fixed;
+  background: rgba(0, 255, 13, 0.5);
+  z-index: 9;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  bottom: 0;
+}
+</style>

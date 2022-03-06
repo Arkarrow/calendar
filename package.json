@@ -1,49 +1,83 @@
 {
-  "name": "anu-timetable",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
-  },
-  "dependencies": {
-    "core-js": "^3.6.5",
-    "vue": "^2.6.11",
-    "vue-router": "^3.2.0",
-    "vuetify": "^2.4.0"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-plugin-router": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "sass": "~1.32.0",
-    "sass-loader": "^10.0.0",
-    "vue-cli-plugin-vuetify": "~2.4.5",
-    "vue-template-compiler": "^2.6.11",
-    "vuetify-loader": "^1.7.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
+    "name": "calendar",
+    "version": "0.1.0",
+    "private": true,
+    "description": "",
+    "scripts": {
+        "dev": "clear && vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint",
+        "electron:build": "vue-cli-service electron:build",
+        "electron:serve": "vue-cli-service electron:serve",
+        "make:component": "vue-cli-service make:component",
+        "make:directive": "vue-cli-service make:directive",
+        "make:layout": "vue-cli-service make:layout",
+        "make:mixin": "vue-cli-service make:mixin",
+        "make:view": "vue-cli-service make:view",
+        "postinstall": "electron-builder install-app-deps",
+        "postuninstall": "electron-builder install-app-deps"
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
+    "main": "background.js",
+    "dependencies": {
+        "@vue/cli-plugin-babel": "4.1.1",
+        "axios": "^0.19.2",
+        "core-js": "^3.6.5",
+        "electron-updater": "^4.6.5",
+        "luxon": "^1.28.0",
+        "querystring": "0.2.0",
+        "update-electron-app": "^2.0.1",
+        "vue": "^2.6.11",
+        "vue-cal": "2.24.0",
+        "vue-datetime": "^1.0.0-beta.14",
+        "vue-router": "^3.3.4",
+        "weekstart": "^1.1.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.11.0",
+        "@babel/plugin-transform-runtime": "^7.11.0",
+        "@babel/preset-env": "^7.11.0",
+        "@vue/cli-plugin-eslint": "4.1.1",
+        "@vue/cli-plugin-unit-jest": "^4.5.13",
+        "@vue/cli-service": "4.1.1",
+        "@vue/eslint-config-prettier": "^6.0.0",
+        "@vue/test-utils": "1.2.2",
+        "babel-eslint": "^10.0.3",
+        "babel-jest": "^27.1.0",
+        "electron": "^13.0.0",
+        "electron-devtools-installer": "^3.1.0",
+        "eslint": "^6.7.2",
+        "eslint-plugin-prettier": "^3.1.4",
+        "eslint-plugin-vue": "^6.0.1",
+        "pluralize": "^8.0.0",
+        "prettier": "^2.3.2",
+        "vue-cli-plugin-electron-builder": "~2.1.1",
+        "vue-cli-plugin-vuetify": "~2.4.5",
+        "vue-cli-plugin-vuetify-cli": "~0.2.4",
+        "vue-template-compiler": "^2.6.11"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended"
+        ],
+        "rules": {},
+        "parserOptions": {
+            "parser": "babel-eslint"
+        }
+    },
+    "postcss": {
+        "plugins": {
+            "autoprefixer": {}
+        }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 8"
     ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+    "keywords": []
 }

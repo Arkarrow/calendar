@@ -4,7 +4,7 @@ module.exports = {
     electronBuilder: {
       builderOptions: {
         productName: "Pharmacie de la Mer d'Iroise - Calendrier",
-        appId: "test.com",
+        appId: "pharmaciedelamerdiroise.com",
         win: {
           target: ["nsis"],
           icon: "public/icon.png",

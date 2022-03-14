@@ -1,8 +1,10 @@
 {
-    "name": "calendar",
+    "name": "pharmacie",
     "version": "0.1.0",
     "private": true,
-    "description": "",
+    "author": "Jules Levassort",
+    "description": "Pharmacie de la pharmacie de la mer d'iroise",
+    "copyright": "Copyright © 2022 ${author}",
     "scripts": {
         "dev": "clear && vue-cli-service serve",
         "build": "vue-cli-service build",
@@ -19,6 +21,8 @@
     },
     "main": "background.js",
     "dependencies": {
+        "@bpmn-io/form-js": "^0.7.0",
+        "@bpmn-io/form-js-editor": "^0.7.0",
         "@vue/cli-plugin-babel": "4.1.1",
         "axios": "^0.19.2",
         "core-js": "^3.6.5",
@@ -30,6 +34,7 @@
         "vue-cal": "2.24.0",
         "vue-datetime": "^1.0.0-beta.14",
         "vue-router": "^3.3.4",
+        "vue-toasted": "^1.1.28",
         "weekstart": "^1.1.0"
     },
     "devDependencies": {

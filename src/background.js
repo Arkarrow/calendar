@@ -12,8 +12,8 @@ import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-const server = "https://github.com/Arkarrow/calendar.git";
-const feed = `${server}/update/${process.platform}/${app.getVersion()}`;
+const server = "https://github.com/Arkarrow/calendar/releases/tag/";
+const feed = `${server}${app.getVersion()}`;
 
 autoUpdater.setFeedURL(feed);
 
@@ -23,11 +23,13 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 let win;
+
 async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: __dirname + "/public/favicon.ico",
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -47,7 +49,9 @@ async function createWindow() {
   }
 
   win.once("ready-to-show", () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    setInterval(() => {
+      autoUpdater.checkForUpdates();
+    }, 60000);
   });
 }
 
@@ -80,23 +84,14 @@ app.on("ready", async () => {
   }
   createWindow();
 });
-
 ipcMain.on("app_version", (event) => {
-  console.log("ok ok");
   event.sender.send("app_version", { version: app.getVersion() });
 });
 
-autoUpdater.on("update-available", () => {
-  win.webContents.send("update_available");
-});
-
-autoUpdater.on("update-downloaded", () => {
-  win.webContents.send("update_downloaded");
-});
-
-ipcMain.on("restart_app", () => {
-  autoUpdater.quitAndInstall();
-});
+// Disable error dialogs by overriding
+dialog.showErrorBox = function (title, content) {
+  console.log(`${title}\n${content}`);
+};
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

@@ -6,19 +6,17 @@
           <img
             src="@/assets/logo.jpeg"
             alt=""
-            style="width: auto; height: 60px"
+            style="width: auto; height: 50px"
           />
         </div>
-        <div class="w-2/3 text-left middle">
-          <button>Jour</button>
-          <button>Semaine</button>
-          <button>Mois</button>
-          <button>Année</button>
-        </div>
+        <div class="w-2/3 text-left middle"></div>
         <div class="w-3/3 text-right">
-          <i class="ri-account-circle-line w ri-2x"></i>
-          <i class="ri-settings-5-line w ri-2x"></i>
-          <i class="ri-question-line w ri-2x"></i>
+          <router-link to="/parameters">
+            <i class="ri-settings-5-line w ri-2x"></i>
+          </router-link>
+          <router-link to="/help">
+            <i class="ri-question-line w ri-2x"></i>
+          </router-link>
         </div>
       </div>
     </nav>
@@ -102,33 +100,40 @@
               </option>
             </select>
 
-            <div v-for="(f, index) in form[selectForm].form" :key="index">
-              <select v-if="f.tag == 'select'" v-model="f.model">
-                <option
-                  :value="v.value"
-                  v-for="(v, index) in f.value"
-                  :key="index"
-                >
-                  {{ v.text }}
-                </option>
-              </select>
-              <textarea
-                v-if="f.tag == 'textarea'"
-                v-model="f.model"
-                :placeholder="f.placeholder"
-              ></textarea>
-              <input
-                v-if="f.tag == 'input'"
-                v-model="f.model"
-                :placeholder="f.placeholder"
-              />
+            <div v-for="(f, index) in form" :key="index">
+              <div v-if="f.name == selectForm">
+                <div v-for="(g, i) in f.form" :key="i">
+                  <select v-if="g.type == 'select'" v-model="dynamicModel[i]">
+                    <option
+                      :value="v.value"
+                      v-for="(v, index) in g.values"
+                      :key="index"
+                    >
+                      {{ v.label }}
+                    </option>
+                  </select>
+                  <input
+                    v-if="g.type == 'textfield'"
+                    v-model="dynamicModel[i]"
+                    :placeholder="g.label"
+                  />
+                </div>
+              </div>
             </div>
-            <hr />
-
             <datetime
-              type="time"
+              type="datetime"
               input-id="dateHourPicker"
               v-model="dateHourPicker"
+              class="theme-orange"
+              :phrases="{ ok: 'Ok', cancel: 'Annuler' }"
+              :minute-step="fractionBy"
+              title="A quelle heure sera programmé le rdv ?"
+            ></datetime>
+
+            <datetime
+              type="datetime"
+              input-id="dateHourPicker"
+              v-model="dateHourPickerEnd"
               class="theme-orange"
               :phrases="{ ok: 'Ok', cancel: 'Annuler' }"
               :minute-step="fractionBy"
@@ -138,21 +143,14 @@
               <div>
                 <input type="number" placeholder="Numéro de téléphone" />
               </div>
-              <textarea
-                name=""
-                id=""
-                cols="30"
-                rows="10"
-                placeholder="Note"
-              ></textarea>
             </div>
-
             <button @click="AddRDV()">Ajouter</button>
           </div>
         </div>
       </div>
       <div class="w-5/6">
         <vue-cal
+          hide-title-bar
           hide-view-selector
           ref="vuecal"
           class="vuecal--green-theme w-full"
@@ -186,61 +184,24 @@ import "vue-datetime/dist/vue-datetime.css";
 import axios from "axios";
 
 const dailyHours = { from: 5 * 60, to: 20 * 60, class: "business-hours" };
+
 let baseUri = "http://localhost:4444/";
 export default {
   name: "Calendar",
   components: { "vue-cal": vuecal },
   data: () => ({
+    sA: [1, 4, 7, 10, 13, 16, 19, 21],
+    sB: [2, 5, 8, 11, 14, 17, 20, 22],
+    sC: [3, 6, 9, 12, 15, 18, 21, 23],
     products: [],
     loadProducts: [],
-    selectForm: "principale",
-    form: {
-      principale: {
-        form: [
-          {
-            tag: "input",
-            placeholder: "Nom",
-            model: "",
-          },
-          {
-            tag: "input",
-            placeholder: "Prénom",
-            model: "",
-          },
-          {
-            tag: "select",
-            value: [
-              { text: "Vaccination des + 65 ans", value: "1" },
-              { text: "abcd", value: "2" },
-              { text: "julouuu", value: "3" },
-            ],
-            model: "1",
-          },
-          {
-            tag: "textarea",
-            placeholder: "okoko",
-            model: "",
-          },
-        ],
-      },
-      aromatherapie: {
-        form: [
-          {
-            tag: "input",
-            placeholder: "Prout",
-            model: "",
-          },
-          {
-            tag: "input",
-            placeholder: "Dindon",
-            model: "",
-          },
-        ],
-      },
-    },
+    selectForm: "Principale",
+    form: {},
+    dynamicModel: [],
     openCalendarSelect: false,
     createRDV: true,
     dateHourPicker: "",
+    dateHourPickerEnd: "",
     activeView: "week",
     popupIsOpen: false,
     selectedEvent: {},
@@ -254,7 +215,7 @@ export default {
       6: dailyHours,
       7: dailyHours,
     },
-    openAt: 6,
+    openAt: 8,
     closeAt: 20,
     fractionBy: 15,
     defaultView: "week",
@@ -310,17 +271,57 @@ export default {
   async mounted() {
     // console.log("P: " + p);
     console.log("this.events: " + JSON.stringify(this.events));
-    // this.setEventVal();
+
+    console.log("reload");
     this.selectDate = this.today;
     this.dateHourPicker = this.today;
     this.loadProducts.push("principale");
 
     this.fetchCalendarProducts();
+    this.getCalendarForms();
+
+    setInterval(() => {
+      this.getSemaineType(this.today);
+    }, 100);
+
+    this.fetchEvents();
     setInterval(() => {
       this.fetchEvents();
-    }, 2000);
+    }, 5000);
+  },
+  watch: {
+    watcher() {},
   },
   methods: {
+    getCalendarForms() {
+      axios
+        .get(baseUri + "calendar/forms")
+        .then((res) => {
+          this.form = res.data.forms;
+          console.log(this.forms);
+        })
+        .catch((err) => console.error(err));
+    },
+    getSemaineType(dateW) {
+      let currentdate = new Date(dateW);
+      var oneJan = new Date(currentdate.getFullYear(), 0, 1);
+      var numberOfDays = Math.floor(
+        (currentdate - oneJan) / (24 * 60 * 60 * 1000)
+      );
+      var result = Math.ceil((currentdate.getDay() + 1 + numberOfDays) / 7);
+
+      if (this.sA.includes(result - 1)) {
+        // semaine A
+        dailyHours.class = "business-hours-a";
+      } else if (this.sB.includes(result - 1)) {
+        // semaine B
+        dailyHours.class = "business-hours-b";
+      } else if (this.sC.includes(result - 1)) {
+        // semaine C
+
+        dailyHours.class = "business-hours-c";
+      }
+    },
     generateForm(event) {
       this.selectForm = event.target.value;
     },
@@ -339,11 +340,49 @@ export default {
     onEventCreate() {},
     AddRDV() {
       //  let { telephone, hour, type, calendar } = this;
-      for (let i = 0; i < this.form[this.selectForm].form.length; i++) {
-        console.log(this.form[this.selectForm].form[i].model);
+
+      let rdv = { title: "", description: "", start: "", end: "" };
+
+      let properties = this.form.filter(
+        (word) => word.name == this.selectForm
+      )[0];
+
+      for (let i = 0; i < this.dynamicModel.length; i++) {
+        console.log(this.dynamicModel[i]);
+        if (properties.form[i].type == "select") {
+          rdv.description += this.dynamicModel[i] + ", ";
+        }
+        if (properties.form[i].type == "textfield") {
+          rdv.title += this.dynamicModel[i] + " ";
+        }
+      }
+
+      axios
+        .post(baseUri + "calendar/events", {
+          start: this.cleanDateString(this.dateHourPicker),
+          end: this.cleanDateString(this.dateHourPickerEnd),
+          title: rdv.title,
+          content: rdv.description,
+          classCss: "sport",
+          category: this.selectForm,
+          background: true,
+        })
+        .then(() =>
+          this.$toasted.show("Rendez-vous enregistré avec succès !", {
+            theme: "toasted-primary",
+            position: "top-center",
+            duration: 5000,
+          })
+        )
+        .catch((err) => console.error(err));
+    },
+    cleanDateString(stringDate) {
+      if (stringDate) {
+        let d = stringDate.split("T");
+        let fd = d[0] + " " + d[1].substring(0, 5);
+        return fd;
       }
     },
-
     viewTheDate() {
       console.log(new Date(this.selectDate));
       this.$refs.vuecal.switchView("week", new Date(this.selectDate));
@@ -427,6 +466,24 @@ export default {
 .business-hours {
   background-color: rgba(0, 247, 255, 0.2);
   border: solid rgba(0, 247, 255, 0.6);
+  border-width: 2px 0;
+}
+
+.business-hours-a {
+  background-color: rgba(255, 230, 0, 0.2);
+  border: solid rgba(255, 230, 0, 0.6);
+  border-width: 2px 0;
+}
+
+.business-hours-b {
+  background-color: rgba(0, 247, 255, 0.2);
+  border: solid rgba(0, 247, 255, 0.6);
+  border-width: 2px 0;
+}
+
+.business-hours-c {
+  background-color: rgba(225, 0, 255, 0.2);
+  border: solid rgba(225, 0, 255, 0.6);
   border-width: 2px 0;
 }
 

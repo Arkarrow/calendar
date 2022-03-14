@@ -4,17 +4,6 @@
       <div class="left">
         <button class="slbutton" @click="$router.push('/')">Quitter</button>
       </div>
-      <div class="right">
-        <button @click="$router.push('/account')">
-          <i class="ri-account-circle-line ri-2x w"></i>
-        </button>
-        <button @click="$router.push('/lock')">
-          <i class="ri-lock-2-line ri-2x w"></i>
-        </button>
-        <button @click="$router.push('/help')">
-          <i class="ri-question-line ri-2x w"></i>
-        </button>
-      </div>
     </nav>
     <h1>Besoin d'aide ?</h1>
     <table>

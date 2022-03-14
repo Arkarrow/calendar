@@ -1,12 +1,16 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Calendar from "@/components/Calendar";
+import Login from "@/components/Login";
 import Parameters from "@/components/Parameters";
 import Help from "@/components/Help";
+import Toasted from "vue-toasted";
 
 import { Datetime } from "vue-datetime";
 
 Vue.component("datetime", Datetime);
+
+Vue.use(Toasted);
 Vue.use(Router);
 
 export default new Router({
@@ -25,6 +29,11 @@ export default new Router({
       path: "/help",
       name: "Help",
       component: Help,
+    },
+    {
+      path: "/login",
+      name: "Login",
+      component: Login,
     },
   ],
 });

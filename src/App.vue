@@ -161,4 +161,8 @@ export default {
   line-height: 50px;
   bottom: 0;
 }
+
+.fjs-powered-by {
+  display: none;
+}
 </style>

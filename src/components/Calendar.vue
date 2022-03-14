@@ -185,7 +185,7 @@ import axios from "axios";
 
 const dailyHours = { from: 5 * 60, to: 20 * 60, class: "business-hours" };
 
-let baseUri = "http://localhost:4444/";
+let baseUri = "https://pharmacie.juleslevassort.com/";
 export default {
   name: "Calendar",
   components: { "vue-cal": vuecal },

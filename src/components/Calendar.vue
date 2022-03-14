@@ -58,7 +58,7 @@
             <div class="flex mb-2" v-for="(d, index) in products" :key="index">
               <div class="w-1/3">
                 <input
-                  v-if="d.name == 'Principale'"
+                  v-if="d.name == 'Principal'"
                   type="checkbox"
                   name=""
                   id=""
@@ -195,7 +195,7 @@ export default {
     sC: [3, 6, 9, 12, 15, 18, 21, 23],
     products: [],
     loadProducts: [],
-    selectForm: "Principale",
+    selectForm: "Principal",
     form: {},
     dynamicModel: [],
     openCalendarSelect: false,
@@ -275,7 +275,7 @@ export default {
     console.log("reload");
     this.selectDate = this.today;
     this.dateHourPicker = this.today;
-    this.loadProducts.push("principale");
+    this.loadProducts.push("principal");
 
     this.fetchCalendarProducts();
     this.getCalendarForms();

@@ -8,7 +8,7 @@ module.exports = {
         win: {
           target: ["nsis"],
           icon: "public/icon.png",
-          requestedExecutionLevel: "requireAdministrator",
+          // requestedExecutionLevel: "requireAdministrator",
         },
         mac: {
           icon: "public/icon.png",
@@ -16,10 +16,10 @@ module.exports = {
         nsis: {
           installerIcon: "public/favicon.ico",
           uninstallerIcon: "public/favicon.ico",
-          uninstallDisplayName: "CPU Monitor",
-          license: "license.txt",
+          uninstallDisplayName: "Pharmacie de la Mer d'Iroise - Calendrier",
+          //  license: "license.txt",
           oneClick: false,
-          allowToChangeInstallationDirectory: true,
+          allowToChangeInstallationDirectory: false,
         },
       },
     },

@@ -1,12 +1,12 @@
 {
     "name": "pharmacie",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "private": true,
     "author": "Jules Levassort",
     "description": "Pharmacie de la pharmacie de la mer d'iroise",
     "copyright": "Copyright © 2022 ${author}",
     "scripts": {
-        "dev": "clear && vue-cli-service serve",
+        "dev": "vue-cli-service serve",
         "build": "vue-cli-service build",
         "lint": "vue-cli-service lint",
         "electron:build": "vue-cli-service electron:build",
@@ -26,6 +26,7 @@
         "@vue/cli-plugin-babel": "4.1.1",
         "axios": "^0.19.2",
         "core-js": "^3.6.5",
+        "electron-log": "^4.4.6",
         "electron-updater": "^4.6.5",
         "luxon": "^1.28.0",
         "querystring": "0.2.0",

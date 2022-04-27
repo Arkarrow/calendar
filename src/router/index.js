@@ -3,6 +3,7 @@ import Router from "vue-router";
 import Calendar from "@/components/Calendar";
 import Login from "@/components/Login";
 import Parameters from "@/components/Parameters";
+import Lists from "@/components/ListVue";
 import Help from "@/components/Help";
 import Toasted from "vue-toasted";
 
@@ -34,6 +35,11 @@ export default new Router({
       path: "/login",
       name: "Login",
       component: Login,
+    },
+    {
+      path: "/lists",
+      name: "Lists",
+      component: Lists,
     },
   ],
 });

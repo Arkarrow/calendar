@@ -1,223 +1,23 @@
 <template>
-  <div class="h-screen">
-    <nav>
-      <div class="flex mb-2">
-        <div class="w-1/3 text-left">
-          <img
-            src="@/assets/logo.jpeg"
-            alt=""
-            style="width: auto; height: 50px"
-          />
-        </div>
-        <div class="w-2/3 text-left middle"></div>
-        <div class="w-3/3 text-right">
-          <router-link to="/parameters">
-            <i class="ri-settings-5-line w ri-2x"></i>
-          </router-link>
-          <router-link to="/help">
-            <i class="ri-question-line w ri-2x"></i>
-          </router-link>
-        </div>
-      </div>
-    </nav>
-    <div class="flex mb-2">
-      <div class="w-1/6">
-        <vue-cal
-          xsmall
-          :time="false"
-          hide-view-selector
-          active-view="month"
-          default-view="month"
-          locale="fr"
-          :disable-views="['years', 'year', 'week', 'day']"
-          @cell-focus="today = $event"
-          class="vuecal--green-theme vuecal--rounded-theme mb-4"
-          style="max-width: 270px; height: 290px; margin: auto"
-        >
-        </vue-cal>
-        <div class="mt-4">
-          <div class="flex mb-2">
-            <div
-              class="pl-12 cursor-pointer"
-              @click="openCalendarSelect = !openCalendarSelect"
-            >
-              Mes calendriers
-              <i
-                :class="`${
-                  openCalendarSelect
-                    ? 'ri-arrow-up-s-line'
-                    : 'ri-arrow-down-s-line'
-                } ri-lg`"
-              ></i>
-            </div>
-          </div>
-          <div
-            class="calendar"
-            :style="{ display: openCalendarSelect ? '' : 'none' }"
-          >
-            <div class="flex mb-2" v-for="(d, index) in products" :key="index">
-              <div class="w-1/3">
-                <input
-                  v-if="d.name == 'labo_et_formations'"
-                  type="checkbox"
-                  name=""
-                  id=""
-                  checked
-                  @change="filterEventByProducts(d.name)"
-                />
-                <input
-                  v-else
-                  type="checkbox"
-                  name=""
-                  id=""
-                  @change="filterEventByProducts(d.name)"
-                />
-              </div>
-              <div class="w-2/3 text-left">
-                <span :class="d.color"> {{ d.name }}</span>
-              </div>
-            </div>
-            <hr class="mb-2 mt-2" />
-          </div>
-          <div class="flex mb-2">
-            <div class="pl-12 cursor-pointer" @click="createRDV = !createRDV">
-              Ajouter un évènement
-              <i
-                :class="`${
-                  createRDV ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
-                } ri-lg`"
-              ></i>
-            </div>
-          </div>
-          <div class="mt-4" :style="{ display: createRDV ? '' : 'none' }">
-            <select name="" id="" @change="generateForm($event)">
-              <option value="">-- Calendrier --</option>
-              <option
-                :value="d.name.toLowerCase()"
-                v-for="(d, index) in products"
-                :key="index"
-              >
-                {{ d.name }}
-              </option>
-            </select>
-
-            <div v-for="(f, index) in form" :key="index">
-              <div v-if="f.name == selectForm">
-                <div v-for="(g, i) in f.form" :key="i">
-                  <select v-if="g.type == 'select'" v-model="dynamicModel[i]">
-                    <option
-                      :value="v.value"
-                      v-for="(v, index) in g.values"
-                      :key="index"
-                    >
-                      {{ v.label }}
-                    </option>
-                  </select>
-                  <input
-                    v-if="g.type == 'textfield'"
-                    v-model="dynamicModel[i]"
-                    :placeholder="g.label"
-                  />
-                </div>
-              </div>
-            </div>
-            <datetime
-              type="datetime"
-              input-id="dateHourPicker"
-              v-model="dateHourPicker"
-              class="theme-orange"
-              :phrases="{ ok: 'Ok', cancel: 'Annuler' }"
-              :minute-step="fractionBy"
-              value-zone="UTC+2"
-              title="À quelle heure sera programmé le rdv ?"
-              placeholder="Date de fin"
-            ></datetime>
-
-            <datetime
-              v-if="selectForm != 'vaccination' && selectForm != 'orthopedie'"
-              type="datetime"
-              input-id="dateHourPicker"
-              v-model="dateHourPickerEnd"
-              class="theme-orange"
-              :phrases="{ ok: 'Ok', cancel: 'Annuler' }"
-              :minute-step="fractionBy"
-              value-zone="UTC+2"
-              title="Quand se termine le rdv ?"
-              placeholder="Date de fin"
-            ></datetime>
-
-            <div
-              v-if="
-                selectForm != 'labo_et_formations' &&
-                selectForm != 'gestion_perso' &&
-                selectForm != ''
-              "
-            >
-              <div>
-                <input type="number" placeholder="Numéro de téléphone" />
-              </div>
-            </div>
-            <button @click="AddRDV()">Ajouter</button>
-          </div>
-        </div>
-      </div>
-      <div class="w-5/6">
-        <vue-cal
-          hide-title-bar
-          hide-view-selector
-          ref="vuecal"
-          class="vuecal--green-theme w-full vuecal--full-height-delete"
-          :selected-date="today"
-          :disable-views="['years', 'year']"
-          :hide-weekdays="[]"
-          :show-week-numbers="false"
-          :default-view="defaultView"
-          events-on-month-view="short"
-          overlaps-per-time-step
-          :events="events"
-          locale="fr"
-          style="min-height: 100vh"
-          :time-from="openAt * 60"
-          :time-to="closeAt * 60"
-          :time-step="fractionBy"
-          editable-events
-          @event-delete="deleteEvent('event-delete', $event)"
-          @event-title-change="updateEvent('event-title-change', $event)"
-          @event-content-change="updateContent('event-content-change', $event)"
-          @event-duration-change="
-            updateDuration('event-duration-change', $event)
-          "
-        >
-        </vue-cal>
-        <!-- :special-hours="specialHours" -->
-      </div>
-    </div>
-  </div>
+  <div>ÉVÈNEMENTS À VENIR</div>
 </template>
 
 <script>
-import vuecal from "vue-cal";
-import "vue-cal/dist/vuecal.css";
-import "vue-cal/dist/i18n/fr.js";
-// You need a specific loader for CSS files
-import "vue-datetime/dist/vue-datetime.css";
 import axios from "axios";
-
-import moment from "moment";
 
 const dailyHours = { from: 5 * 60, to: 20 * 60, class: "business-hours" };
 
 let baseUri = "http://localhost:4444/";
 export default {
   name: "Calendar",
-  components: { "vue-cal": vuecal },
+
   data: () => ({
     sA: [1, 4, 7, 10, 13, 16, 19, 21],
     sB: [2, 5, 8, 11, 14, 17, 20, 22],
     sC: [3, 6, 9, 12, 15, 18, 21, 23],
     products: [],
     loadProducts: [],
-    selectForm: "labo_et_formations",
+    selectForm: "Principal",
     form: {},
     dynamicModel: [],
     openCalendarSelect: false,
@@ -297,8 +97,8 @@ export default {
     console.log("reload");
     this.selectDate = this.today;
     this.dateHourPicker = this.today;
-    this.loadProducts.push("labo_et_formations");
-    this.selectForm = "labo_et_formations";
+    this.loadProducts.push("principal");
+
     this.fetchCalendarProducts();
     this.getCalendarForms();
 
@@ -307,40 +107,14 @@ export default {
     }, 100);
 
     this.fetchEvents();
-    console.log(this.events);
     setInterval(() => {
-      console.log(this.events);
       this.fetchEvents();
     }, 5000);
   },
-
+  watch: {
+    watcher() {},
+  },
   methods: {
-    updateDuration(a, b) {
-      console.log(b);
-    },
-    updateEvent(a, b) {
-      console.log(b);
-    },
-
-    deleteEvent(a, b) {
-      axios
-        .delete(baseUri + "calendar/events/" + b._id)
-        .then(() => {
-          this.$toasted.show("Rendez-vous supprimé avec succès !", {
-            theme: "toasted-primary",
-            position: "top-center",
-            duration: 5000,
-          });
-          this.fetchEvents();
-        })
-        .catch((err) => console.error(err));
-    },
-    checktest() {
-      console.log("ouuuu", this.events);
-    },
-    changingHour() {
-      console.log("changing", this.dateHourPicker);
-    },
     getCalendarForms() {
       axios
         .get(baseUri + "calendar/forms")
@@ -385,7 +159,7 @@ export default {
         console.log(this.loadProducts);
       }
     },
-
+    onEventCreate() {},
     AddRDV() {
       //  let { telephone, hour, type, calendar } = this;
 
@@ -396,47 +170,19 @@ export default {
       )[0];
 
       for (let i = 0; i < this.dynamicModel.length; i++) {
-        if (
-          properties.form[i].type == "select" ||
-          properties.form[i].label == "commentaire" ||
-          properties.form[i].label == "vaccin"
-        ) {
+        console.log(this.dynamicModel[i]);
+        if (properties.form[i].type == "select") {
           rdv.description += this.dynamicModel[i] + ", ";
         }
-        if (
-          properties.form[i].type == "textfield" &&
-          properties.form[i].label != "commentaire" &&
-          properties.form[i].label != "vaccin"
-        ) {
-          if (
-            this.dynamicModel[i].label == "nom" ||
-            this.dynamicModel[i].label == "prenom"
-          ) {
-            rdv.title += this.dynamicModel[i] + " ";
-          } else {
-            rdv.title += this.dynamicModel[i] + " - ";
-          }
+        if (properties.form[i].type == "textfield") {
+          rdv.title += this.dynamicModel[i] + " ";
         }
-      }
-
-      if (this.selectForm == "vaccination") {
-        this.dateHourPickerEnd = moment(
-          this.cleanDateString(this.dateHourPicker)
-        )
-          .add(20, "m")
-          .toDate();
-      } else if (this.selectForm == "orthopedie") {
-        this.dateHourPickerEnd = moment(
-          this.cleanDateString(this.dateHourPicker)
-        )
-          .add(45, "m")
-          .toDate();
       }
 
       axios
         .post(baseUri + "calendar/events", {
           start: this.cleanDateString(this.dateHourPicker),
-          end: this.dateHourPickerEnd,
+          end: this.cleanDateString(this.dateHourPickerEnd),
           title: rdv.title,
           content: rdv.description,
           classCss: "sport",
@@ -488,10 +234,7 @@ export default {
     fetchEvents() {
       axios
         .get(baseUri + "calendar/events?filter=" + this.loadProducts.join(","))
-        .then((res) => {
-          this.events = res.data.data;
-          console.log(this.events);
-        })
+        .then((res) => (this.events = res.data.data))
         .catch((err) => console.error(err));
     },
 

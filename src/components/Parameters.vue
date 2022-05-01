@@ -332,7 +332,7 @@
 import { FormEditor } from "@bpmn-io/form-js";
 import axios from "axios";
 
-let baseUri = "http://localhost:4444/";
+let baseUri = "https://api.calendrier.pharmacie-ploumoguer.fr/";
 
 export default {
   data() {

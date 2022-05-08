@@ -154,7 +154,11 @@
               "
             >
               <div>
-                <input type="number" placeholder="Numéro de téléphone" />
+                <input
+                  type="number"
+                  placeholder="Numéro de téléphone"
+                  v-model="default_numer"
+                />
               </div>
             </div>
             <button @click="AddRDV()">Ajouter</button>
@@ -212,6 +216,7 @@ export default {
   name: "Calendar",
   components: { "vue-cal": vuecal },
   data: () => ({
+    default_numer: "",
     sA: [1, 4, 7, 10, 13, 16, 19, 21],
     sB: [2, 5, 8, 11, 14, 17, 20, 22],
     sC: [3, 6, 9, 12, 15, 18, 21, 23],
@@ -397,13 +402,14 @@ export default {
 
       for (let i = 0; i < this.dynamicModel.length; i++) {
         if (
-          properties.form[i].type == "select" ||
-          properties.form[i].label == "commentaire" ||
-          properties.form[i].label == "vaccin"
+          (properties.form[i] && properties.form[i].type == "select") ||
+          (properties.form[i] && properties.form[i].label == "commentaire") ||
+          (properties.form[i] && properties.form[i].label == "vaccin")
         ) {
           rdv.description += this.dynamicModel[i] + ", ";
         }
         if (
+          properties.form[i] &&
           properties.form[i].type == "textfield" &&
           properties.form[i].label != "commentaire" &&
           properties.form[i].label != "vaccin"
@@ -420,23 +426,24 @@ export default {
       }
 
       if (this.selectForm == "vaccination") {
-        this.dateHourPickerEnd = moment(
-          this.cleanDateString(this.dateHourPicker)
-        )
+        this.dateHourPickerEnd = moment(this.dateHourPicker)
           .add(20, "m")
-          .toDate();
+          .toDate()
+          .format("YYYY-MM-DD H:mm");
       } else if (this.selectForm == "orthopedie") {
-        this.dateHourPickerEnd = moment(
-          this.cleanDateString(this.dateHourPicker)
-        )
+        this.dateHourPickerEnd = moment(this.dateHourPicker)
           .add(45, "m")
-          .toDate();
+          .toDate()
+          .format("YYYY-MM-DD H:mm");
       }
+
+      console.log("before", this.dateHourPickerEnd);
 
       axios
         .post(baseUri + "calendar/events", {
-          start: this.cleanDateString(this.dateHourPicker),
+          start: moment(this.dateHourPicker).format("YYYY-MM-DD H:mm"),
           end: this.dateHourPickerEnd,
+          default_numer: this.default_numer,
           title: rdv.title,
           content: rdv.description,
           classCss: "sport",
@@ -455,6 +462,7 @@ export default {
     },
     cleanDateString(stringDate) {
       if (stringDate) {
+        console.log("spliter date", stringDate);
         let d = stringDate.split("T");
         let fd = d[0] + " " + d[1].substring(0, 5);
         return fd;

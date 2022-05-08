@@ -1,4 +1,9 @@
 module.exports = {
+  devServer: {
+    disableHostCheck: true,
+    https: false,
+    public: "http://calendrier.pharmacie-ploumoguer.fr/",
+  },
   transpileDependencies: ["vuetify"],
   pluginOptions: {
     electronBuilder: {

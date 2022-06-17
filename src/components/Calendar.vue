@@ -442,7 +442,7 @@ export default {
       axios
         .post(baseUri + "calendar/events", {
           start: moment(this.dateHourPicker).format("YYYY-MM-DD H:mm"),
-          end: this.dateHourPickerEnd,
+          end: moment(this.dateHourPickerEnd).format("YYYY-MM-DD H:mm"),
           default_numer: this.default_numer,
           title: rdv.title,
           content: rdv.description,

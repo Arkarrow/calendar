@@ -439,9 +439,9 @@ export default {
           .add(45, "m")
           .toDate()
           .format("YYYY-MM-DD H:mm");
-      } else if (this.selectForm == "orthopedie") {
+      } else if (this.selectForm == "labo_et_formations") {
         this.dateHourPickerEnd = moment(this.dateHourPicker)
-          .add(45, "m")
+          .add(90, "m")
           .toDate()
           .format("YYYY-MM-DD H:mm");
       }

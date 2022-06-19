@@ -130,11 +130,15 @@
               :minute-step="fractionBy"
               value-zone="UTC+2"
               title="À quelle heure sera programmé le rdv ?"
-              placeholder="Date de fin"
+              placeholder="Date de debut"
             ></datetime>
 
             <datetime
-              v-if="selectForm != 'vaccination' && selectForm != 'orthopedie'"
+              v-if="
+                selectForm != 'vaccination' &&
+                selectForm != 'orthopedie' &&
+                selectForm != 'labo_et_formations'
+              "
               type="datetime"
               input-id="dateHourPicker"
               v-model="dateHourPickerEnd"
@@ -428,6 +432,11 @@ export default {
       if (this.selectForm == "vaccination") {
         this.dateHourPickerEnd = moment(this.dateHourPicker)
           .add(20, "m")
+          .toDate()
+          .format("YYYY-MM-DD H:mm");
+      } else if (this.selectForm == "orthopedie") {
+        this.dateHourPickerEnd = moment(this.dateHourPicker)
+          .add(45, "m")
           .toDate()
           .format("YYYY-MM-DD H:mm");
       } else if (this.selectForm == "orthopedie") {

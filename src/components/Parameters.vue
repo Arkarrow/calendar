@@ -332,7 +332,7 @@
 import { FormEditor } from "@bpmn-io/form-js";
 import axios from "axios";
 
-let baseUri = "https://pharmacie.juleslevassort.com/";
+let baseUri = "https://api.calendrier.pharmacie-ploumoguer.fr/";
 
 export default {
   data() {
@@ -384,9 +384,32 @@ export default {
       axios
         .post(baseUri + "calendar/forms", {
           form: this.schema.components,
-          name: "test",
+          name: this.editName,
         })
-        .then(() => this.getCalendarForms())
+        .then((res) => {
+          console.log(res);
+
+          if (res.data && res.data.type == "update") {
+            this.$toasted.show(
+              "Formulaire " + this.editName + " mis à jour avec succès !",
+              {
+                theme: "toasted-primary",
+                position: "top-center",
+                duration: 5000,
+              }
+            );
+          } else {
+            this.$toasted.show(
+              "Formulaire " + this.editName + " créé avec succès !",
+              {
+                theme: "toasted-primary",
+                position: "top-center",
+                duration: 5000,
+              }
+            );
+          }
+          this.getCalendarForms();
+        })
         .catch((err) => console.error(err));
     },
     saveProduct() {
